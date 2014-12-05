@@ -2,6 +2,7 @@ defaultTasks 'build'
 
 apply plugin: 'groovy'
 apply plugin: 'idea'
+apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'license'
 apply plugin: 'com.jfrog.bintray'
@@ -28,6 +29,22 @@ idea {
         downloadJavadoc = true
         downloadSources = true
     }
+}
+
+eclipse {
+	project {
+		natures = [
+			'org.eclipse.jdt.groovy.core.groovyNature', 
+			'org.springsource.ide.eclipse.gradle.core.nature', 
+			'org.eclipse.jdt.core.javanature', 
+			'org.eclipse.wst.common.project.facet.core.nature'
+		]
+		buildCommand 'org.eclipse.wst.common.project.facet.core.builder' 
+		buildCommand 'org.eclipse.jdt.core.javabuilder'
+	}
+	classpath {
+		
+	}
 }
 
 configurations.compile.transitive = false
