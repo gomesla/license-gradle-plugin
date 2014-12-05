@@ -57,10 +57,10 @@ class LicenseReporter {
      */
     public void generateXMLReport4LicenseToDependency(Set<DependencyMetadata> dependencyMetadataSet, String fileName) {
         MarkupBuilder xml = getMarkupBuilder(fileName, xmlOutputDir)
-        HashMultimap<LicenseMetadata, String> licensesMap = getLicenseMap(dependencyMetadataSet)
+        Map<LicenseMetadata, Collection<String>> licensesMap = getLicenseMap(dependencyMetadataSet)
 
         xml.licenses() {
-            licensesMap.asMap().each {
+            licensesMap.each {
                 entry ->
                     def attributes = [name: entry.key.licenseName]
 
@@ -159,7 +159,7 @@ class LicenseReporter {
      */
     public void generateHTMLReport4LicenseToDependency(Set<DependencyMetadata> dependencyMetadataSet, String fileName) {
         MarkupBuilder html = getMarkupBuilder(fileName, htmlOutputDir)
-        HashMultimap<LicenseMetadata, String> licensesMap = getLicenseMap(dependencyMetadataSet)
+        Map<LicenseMetadata, Collection<String>> licensesMap = getLicenseMap(dependencyMetadataSet)
 
         html.html {
             head {
@@ -212,7 +212,7 @@ class LicenseReporter {
                         th(){ h3("Dependency") }
                     }
 
-                    licensesMap.asMap().each {
+                    licensesMap.each {
                         entry ->
                             tr {
                                 td(entry.key.licenseName, class: 'licenseName')
@@ -237,13 +237,17 @@ class LicenseReporter {
     }
 
     // Utility
-    private HashMultimap<LicenseMetadata, String> getLicenseMap(Set<DependencyMetadata> dependencyMetadataSet) {
-        HashMultimap<LicenseMetadata, String> licensesMap = HashMultimap.create()
+    private Map<LicenseMetadata, Collection<String>> getLicenseMap(Set<DependencyMetadata> dependencyMetadataSet) {
+        Map<LicenseMetadata, Collection<String>> licensesMap = new HashMap<LicenseMetadata, Collection<String>>();
 
         dependencyMetadataSet.each {
             dependencyMetadata ->
                 dependencyMetadata.licenseMetadataList.each {
-                    license -> licensesMap.put(license, dependencyMetadata.dependencyFileName)
+                    license -> 
+					if(!licensesMap.containsKey(license)) {
+						licensesMap.put(license, new LinkedHashSet<String>())
+					}
+					licensesMap.get(license).add(dependencyMetadata.dependencyFileName)
                 }
         }
 
